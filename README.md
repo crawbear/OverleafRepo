@@ -64,13 +64,14 @@ Projects persist between sessions during normal operations.
 - Stop stack:(projects still there) `docker compose down`
 - Logs: `docker compose logs -f overleaf`
 
+Data persists between sessions in Docker volumes (`overleaf-data`, `mongo-data`, `redis-data`).
+
 ## Removal
 
 - Delete saved data and containers: `docker compose down -v`
 - Remove this stack including images: `docker compose down --rmi all -v`
 - Complete removal: delete the OverLeafSelf folder after cleanup
 
-Data persists between sessions in Docker volumes (`overleaf-data`, `mongo-data`, `redis-data`).
 
 ## Access model (who can connect)
 
