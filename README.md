@@ -16,12 +16,24 @@ This folder contains a local, self-hosted Overleaf Community stack using Docker.
 
 ## First start
 
-1. Copy `.env.example` to `.env`:
+1. **Create your configuration file** (choose one method):
+   
+   **Option A - PowerShell terminal:**
    ```powershell
    Copy-Item .env.example .env
    ```
-2. Edit `.env` and change `OVERLEAF_ADMIN_PASSWORD` to a strong password.
-3. Start services:
+   
+   **Option B - Windows Explorer:**
+   - Right-click `.env.example`
+   - Select "Copy"
+   - Right-click in the same folder → "Paste"
+   - Rename the copy from `.env.example - Copy` to `.env`
+
+2. **Edit `.env`** (right-click → Open with Notepad) and change:
+   - `OVERLEAF_ADMIN_PASSWORD=change-me-now` to a strong password
+   - Optionally change `OVERLEAF_PORT` if 9100 is already in use
+
+3. **Start services** (in PowerShell terminal):
    ```powershell
    docker compose up -d
    ```
@@ -29,10 +41,15 @@ This folder contains a local, self-hosted Overleaf Community stack using Docker.
    ```powershell
    docker compose exec mongo mongosh --eval "rs.initiate({_id: 'overleaf', members:[{_id:0, host:'mongo:27017'}]})"
    ```
-5. Restart app after replica set init:
+5. Restart app after replica set init (takes 1-2 minutes on first run):
    ```powershell
    docker compose restart overleaf
    ```
+   Wait for migrations to complete:
+   ```powershell
+   docker compose logs -f overleaf
+   ```
+   Look for: `Finished migrations` and `Runit started`
 6. Open:
    - http://localhost:9100
 
