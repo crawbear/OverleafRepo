@@ -1,6 +1,10 @@
 # OverLeafSelf (Self-hosted Overleaf Community)
 
-This folder contains a local, self-hosted Overleaf Community stack using Docker.
+This repository provides a Docker-based setup to run your own self-hosted Overleaf Community editor on your computer.
+
+By default when setup, it runs locally only (`localhost`) and stores your projects in Docker volumes, so your files and account data persist between restarts. Compilation uses your own machine resources, so there are no compilation time limits. 
+
+
 
 ## What is included
 
@@ -54,10 +58,38 @@ This folder contains a local, self-hosted Overleaf Community stack using Docker.
    - http://localhost:9100
 
 ## Daily operations
+Projects persist between sessions during normal operations.
 
-- Start stack: `docker compose up -d`
-- Stop stack: `docker compose down`
+- Start stack:(safe, keeps your projects) `docker compose up -d`
+- Stop stack:(projects still there) `docker compose down`
 - Logs: `docker compose logs -f overleaf`
+
+## Removal
+
+- Delete saved data and containers: `docker compose down -v`
+- Remove this stack including images: `docker compose down --rmi all -v`
+- Complete removal: delete the OverLeafSelf folder after cleanup
+
+Data persists between sessions in Docker volumes (`overleaf-data`, `mongo-data`, `redis-data`).
+
+## Access model (who can connect)
+
+- Current setup is local-only by default.
+- Because the port is bound to `127.0.0.1`, only the computer running the editor can open Overleaf at `http://localhost:9100`.
+- Multiple users are not enabled by default from other machines.
+
+If you want LAN access, change the port binding in `docker-compose.yml` from:
+
+`127.0.0.1:${OVERLEAF_PORT:-9100}:8080`
+
+to:
+
+`${OVERLEAF_PORT:-9100}:8080`
+
+Then other devices can use `http://<your-pc-ip>:9100` on the same network.
+(Run 'ipconfig' in PowerShell to check your private IP)
+
+For internet/public access, use a reverse proxy with HTTPS, set secure cookie options, and harden account settings first.
 
 ## Backup
 
