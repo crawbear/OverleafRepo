@@ -15,22 +15,37 @@ services:
       ENABLED_LINKED_FILE_TYPES: project_file,project_output_file
       OVERLEAF_SITE_URL: ${OVERLEAF_SITE_URL:-http://localhost:9100}
       OVERLEAF_NAV_TITLE: ${OVERLEAF_NAV_TITLE:-OverLeafSelf}
-      OVERLEAF_SECURE_COOKIE: ${OVERLEAF_SECURE_COOKIE:-false}
       OVERLEAF_BEHIND_PROXY: ${OVERLEAF_BEHIND_PROXY:-false}
       EMAIL_CONFIRMATION_DISABLED: ${EMAIL_CONFIRMATION_DISABLED:-true}
-      OVERLEAF_ADMIN_EMAIL: ${OVERLEAF_ADMIN_EMAIL:-admin@example.com}
+      OVERLEAF_ADMIN_EMAIL: ${OVERLEAF_ADMIN_EMAIL:?Set OVERLEAF_ADMIN_EMAIL in .env}
       OVERLEAF_ADMIN_PASSWORD: ${OVERLEAF_ADMIN_PASSWORD:-change-me-now}
       SHARELATEX_APP_NAME: ${OVERLEAF_APP_NAME:-Overleaf Community}
       SHARELATEX_MONGO_URL: mongodb://mongo:27017/sharelatex?replicaSet=overleaf&directConnection=true&serverSelectionTimeoutMS=300000
       SHARELATEX_REDIS_HOST: redis
       SHARELATEX_SITE_URL: ${OVERLEAF_SITE_URL:-http://localhost:9100}
       SHARELATEX_NAV_TITLE: ${OVERLEAF_NAV_TITLE:-OverLeafSelf}
-      SHARELATEX_SECURE_COOKIE: ${OVERLEAF_SECURE_COOKIE:-false}
       SHARELATEX_BEHIND_PROXY: ${OVERLEAF_BEHIND_PROXY:-false}
-      SHARELATEX_ADMIN_EMAIL: ${OVERLEAF_ADMIN_EMAIL:-admin@example.com}
+      SHARELATEX_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS: "false"
+      SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: "true"
+      SHARELATEX_ADMIN_EMAIL: ${OVERLEAF_ADMIN_EMAIL:?Set OVERLEAF_ADMIN_EMAIL in .env}
     volumes:
       - overleaf-data:/var/lib/overleaf
       - overleaf-logs:/var/log/overleaf
+
+  seed-owner:
+    image: koehlerlukas/overleaf:latest
+    container_name: overleaf-seed-owner
+    restart: on-failure
+    depends_on:
+      - mongo
+    environment:
+      SHARELATEX_MONGO_URL: mongodb://mongo:27017/sharelatex?replicaSet=overleaf&directConnection=true&serverSelectionTimeoutMS=300000
+      OVERLEAF_ADMIN_EMAIL: ${OVERLEAF_ADMIN_EMAIL:?Set OVERLEAF_ADMIN_EMAIL in .env}
+      OVERLEAF_ADMIN_PASSWORD: ${OVERLEAF_ADMIN_PASSWORD:-change-me-now}
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["cd /var/www/sharelatex/web && node /opt/overleaf-seed/seed-owner.js"]
+    volumes:
+      - ./scripts/seed-owner.js:/opt/overleaf-seed/seed-owner.js:ro
 
   mongo:
     image: mongo:6

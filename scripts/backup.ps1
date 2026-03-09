@@ -27,8 +27,12 @@ $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 Push-Location $ProjectRoot
 
 try {
-    Write-Host "[1/3] Ensuring containers are up..."
-    docker compose up -d | Out-Null
+    $runningServices = @(docker compose ps --services --filter "status=running" 2>$null)
+
+    if (-not $runningServices -or -not ($runningServices -contains "mongo")) {
+        # Silent success path for scheduled tasks when stack is not running.
+        exit 0
+    }
 
     Write-Host "[2/3] Creating MongoDB logical backup..."
     $mongoArchive = Join-Path $BackupDir "mongo-$timestamp.archive.gz"
